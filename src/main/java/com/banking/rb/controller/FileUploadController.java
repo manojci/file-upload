@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ import com.banking.rb.vo.Customer;
 @RestController
 public class FileUploadController {
 
+	Logger logger = Logger.getLogger(FileUploadController.class);
 	@Autowired
 	FileStorageService fileStorageService;
 	@Autowired
@@ -34,13 +36,18 @@ public class FileUploadController {
 	public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
 		String message = "";
 		try {
+			if(fileStorageService.fileAlreadyExists(file.getOriginalFilename())) {
+				logger.info("File is replaced with the new file");
+			}
 			fileStorageService.store(file);
 			files.add(file.getOriginalFilename());
 
 			message = "You successfully uploaded " + file.getOriginalFilename() + "!";
+			logger.info(message);
 			return ResponseEntity.status(HttpStatus.OK).body(message);
 		} catch (Exception e) {
 			message = "FAIL to upload " + file.getOriginalFilename() + "!";
+			logger.error(message);
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(message);
 		}
 	}

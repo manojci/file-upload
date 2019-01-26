@@ -37,6 +37,23 @@ public class FileStorageServiceImpl implements FileStorageService {
 			throw new RuntimeException("FAIL!");
 		}
 	}
+	
+	public boolean fileAlreadyExists(String filename) {
+		try {
+			boolean exists = false;
+			Path file = rootLocation.resolve(filename);
+			Resource resource = new UrlResource(file.toUri());
+			if (resource.exists() || resource.isReadable()) {
+				exists = true;
+				FileSystemUtils.deleteRecursively(file);
+			} 
+			return exists;
+		} catch (MalformedURLException e) {
+			throw new RuntimeException("FAIL!");
+		} catch (IOException e) {
+			throw new RuntimeException("FAIL!");
+		}
+	}
 
 	public void deleteAll() {
 		FileSystemUtils.deleteRecursively(rootLocation.toFile());
